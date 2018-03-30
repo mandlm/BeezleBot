@@ -1,0 +1,3 @@
+[submodule "tgbot"]
+	path = tgbot
+	url = git@github.com:mandlm/telegram-bot-api
