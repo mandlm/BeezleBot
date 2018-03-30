@@ -13,6 +13,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE 
 		Boost::program_options
 		tgbot
+		DokuWiki
 )
 
 target_compile_features(${PROJECT_NAME}

@@ -1,5 +1,6 @@
 #include "settings.h"
 #include "tgbot/bot.h"
+#include "dokuwiki.h"
 
 #include <iostream>
 #include <sstream>
@@ -10,29 +11,33 @@ int main(int argc, char **argv)
 	{
 		Settings settings(argc, argv);
 
-		std::cout << "token: " << settings.token << std::endl;
-		std::cout << "users: " << std::flush;
-		for (const auto &user : settings.users)
-		{
-			std::cout << user << " ";
-		}
-		std::cout << std::endl;
+		DokuWiki wiki(settings.wikiUrl, settings.wikiUser, settings.wikiPassword);
 
-		tgbot::LongPollBot bot(settings.token);
-		bot.callback([] (const tgbot::types::Message message, const tgbot::methods::Api &api)
+		tgbot::LongPollBot bot(settings.telegramToken);
+		bot.callback([&wiki, &settings] (const tgbot::types::Message message, 
+					const tgbot::methods::Api &api)
 		{
-			if (message.text != nullptr && message.from != nullptr)
+			if (message.text != nullptr 
+					&& message.from != nullptr 
+					&& message.from->username != nullptr)
 			{
-				std::ostringstream logMessage;
-				logMessage << message.from->firstName;
-
-				if (message.from->username != nullptr)
-				{	
-					logMessage << " (" << *message.from->username << ")";
+				if (settings.telegramUsers.find(*message.from->username) 
+						== settings.telegramUsers.end())
+				{
+					api.sendMessage(std::to_string(message.chat.id), "Unknown user!");
 				}
-				
-				logMessage << ": " << *message.text;
-				api.getLogger().info(logMessage.str());
+				else
+				{
+					std::ostringstream logMessage;
+					logMessage << message.from->firstName
+						<< " (" << *message.from->username << ")"
+						<< ": " << *message.text;
+					api.getLogger().info(logMessage.str());
+
+					std::ostringstream wikiMessage;
+					wikiMessage << "\n" << logMessage.str() << "\n";
+					wiki.appendToPage("beezletest", wikiMessage.str());
+				}
 			}
 		});
 		bot.start();

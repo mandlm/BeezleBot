@@ -10,12 +10,17 @@ Settings::Settings(int argc, char **argv)
 {
 	namespace po = boost::program_options;
 
+	std::vector<std::string> telegramUserList;
+
 	po::options_description commandlineOptions("Allowed options");
 	commandlineOptions.add_options()
 		("help,h", "show this help message")
 		("config-file,f", po::value<std::string>(), "read options from config file")
-		("token,t", po::value<std::string>(&token)->required(), "Telegram bot token")
-		("users,u", po::value<std::vector<std::string>>(&users)->multitoken()->required(), "allowed Telegram users")
+		("telegram-token", po::value(&telegramToken)->required(), "Telegram bot token")
+		("telegram-users", po::value(&telegramUserList)->multitoken()->required(), "allowed Telegram users")
+		("wiki-url", po::value(&wikiUrl)->required(), "DokuWiki xml-rpc url")
+		("wiki-username", po::value(&wikiUser)->required(), "DokuWiki xml-rpc username")
+		("wiki-password", po::value(&wikiPassword)->required(), "DokuWiki xml-rpc password")
 	;
 
 	po::variables_map configuredOptions;
@@ -34,16 +39,22 @@ Settings::Settings(int argc, char **argv)
 
 		po::options_description fileOptions;
 		fileOptions.add_options()
-			("Telegram.token", po::value<std::string>(&token))
-			("Telegram.users", po::value<std::vector<std::string>>(&users)->multitoken())
+			("Telegram.token", po::value(&telegramToken))
+			("Telegram.users", po::value(&telegramUserList)->multitoken())
+			("DokuWiki.url", po::value(&wikiUrl)->required())
+			("DokuWiki.username", po::value(&wikiUser)->required())
+			("DokuWiki.password", po::value(&wikiPassword)->required())
 		;
 
 		try
 		{
 			po::store(po::parse_config_file(configFile, fileOptions), configuredOptions);
 
-			configuredOptions.insert({ "token", configuredOptions["Telegram.token"] });
-			configuredOptions.insert({ "users", configuredOptions["Telegram.users"] });
+			configuredOptions.insert({ "telegram-token", configuredOptions["Telegram.token"] });
+			configuredOptions.insert({ "telegram-users", configuredOptions["Telegram.users"] });
+			configuredOptions.insert({ "wiki-url", configuredOptions["DokuWiki.url"] });
+			configuredOptions.insert({ "wiki-username", configuredOptions["DokuWiki.username"] });
+			configuredOptions.insert({ "wiki-password", configuredOptions["DokuWiki.password"] });
 		}
 		catch (po::unknown_option &e)
 		{
@@ -55,6 +66,8 @@ Settings::Settings(int argc, char **argv)
 	try
 	{
 		po::notify(configuredOptions);
+
+		telegramUsers.insert(telegramUserList.begin(), telegramUserList.end());
 	}
 	catch (po::required_option &e)
 	{
