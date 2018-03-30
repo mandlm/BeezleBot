@@ -34,13 +34,16 @@ Settings::Settings(int argc, char **argv)
 
 		po::options_description fileOptions;
 		fileOptions.add_options()
-			("token", po::value<std::string>(&token))
-			("users", po::value<std::vector<std::string>>(&users)->multitoken())
+			("Telegram.token", po::value<std::string>(&token))
+			("Telegram.users", po::value<std::vector<std::string>>(&users)->multitoken())
 		;
 
 		try
 		{
 			po::store(po::parse_config_file(configFile, fileOptions), configuredOptions);
+
+			configuredOptions.insert({ "token", configuredOptions["Telegram.token"] });
+			configuredOptions.insert({ "users", configuredOptions["Telegram.users"] });
 		}
 		catch (po::unknown_option &e)
 		{
