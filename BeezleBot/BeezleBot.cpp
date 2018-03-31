@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 				{
 					std::ostringstream logMessage;
 					logMessage << message.from->firstName << " (" << *message.from->username << ")"
-					           << ": " << *message.text;
+					           << ":\\\\ " << *message.text;
 					api.getLogger().info(logMessage.str());
 
 					std::ostringstream wikiMessage;
