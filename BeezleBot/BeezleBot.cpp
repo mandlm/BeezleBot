@@ -14,29 +14,39 @@ int main(int argc, char **argv)
 		DokuWiki wiki(settings.wikiUrl, settings.wikiUser, settings.wikiPassword);
 
 		tgbot::LongPollBot bot(settings.telegramToken);
-		bot.callback([&wiki, &settings] (const tgbot::types::Message message, 
-					const tgbot::methods::Api &api)
+		bot.callback([&wiki, &settings](const tgbot::types::Message message,
+		                                const tgbot::methods::Api &api) 
 		{
-			if (message.text != nullptr 
-					&& message.from != nullptr 
-					&& message.from->username != nullptr)
+			if (message.text != nullptr && message.from != nullptr
+			    && message.from->username != nullptr)
 			{
-				if (settings.telegramUsers.find(*message.from->username) 
-						== settings.telegramUsers.end())
+				if (settings.telegramUsers.find(*message.from->username)
+				    == settings.telegramUsers.end())
 				{
 					api.sendMessage(std::to_string(message.chat.id), "Unknown user!");
 				}
 				else
 				{
 					std::ostringstream logMessage;
-					logMessage << message.from->firstName
-						<< " (" << *message.from->username << ")"
-						<< ": " << *message.text;
+					logMessage << message.from->firstName << " (" << *message.from->username << ")"
+					           << ": " << *message.text;
 					api.getLogger().info(logMessage.str());
 
 					std::ostringstream wikiMessage;
 					wikiMessage << "\n" << logMessage.str() << "\n";
-					wiki.appendToPage("beezletest", wikiMessage.str());
+					try
+					{
+						wiki.appendToPage("beezletest", wikiMessage.str());
+					}
+					catch (std::runtime_error &e)
+					{
+						std::ostringstream reply;
+						reply << "Error writing to wiki: " << e.what();
+						api.getLogger().error(reply.str());
+						api.sendMessage(std::to_string(message.chat.id), reply.str());
+					}
+
+					api.sendMessage(std::to_string(message.chat.id), "Stored to wiki");
 				}
 			}
 		});
@@ -51,4 +61,3 @@ int main(int argc, char **argv)
 
 	return EXIT_SUCCESS;
 }
-
