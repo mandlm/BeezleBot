@@ -11,7 +11,8 @@ int main(int argc, char **argv)
 	{
 		Settings settings(argc, argv);
 
-		DokuWiki wiki(settings.wikiUrl, settings.wikiUser, settings.wikiPassword);
+		DokuWiki wiki(settings.wikiUrl + "/lib/exe/xmlrpc.php", 
+				settings.wikiUser, settings.wikiPassword);
 
 		tgbot::LongPollBot bot(settings.telegramToken);
 		bot.callback([&wiki, &settings](const tgbot::types::Message message,
@@ -46,7 +47,10 @@ int main(int argc, char **argv)
 						api.sendMessage(std::to_string(message.chat.id), reply.str());
 					}
 
-					api.sendMessage(std::to_string(message.chat.id), "Stored to wiki");
+					std::ostringstream pageUrl;
+					pageUrl << settings.wikiUrl << "/doku.php?id=" << "beezletest";
+					api.sendMessage(std::to_string(message.chat.id), 
+							"Stored to wiki at " + pageUrl.str());
 				}
 			}
 		});
