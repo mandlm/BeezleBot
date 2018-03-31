@@ -1,12 +1,16 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.6)
 
 project(BeezleBot LANGUAGES CXX)
 
-find_package(Boost 1.60.0 COMPONENTS program_options REQUIRED)
+find_package(Boost 1.55.0 COMPONENTS program_options REQUIRED)
 
 add_executable(${PROJECT_NAME} 
 	BeezleBot.cpp
 	settings.cpp
+)
+
+set_target_properties(${PROJECT_NAME}
+	PROPERTIES CXX_STANDARD 14
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -14,10 +18,5 @@ target_link_libraries(${PROJECT_NAME}
 		Boost::program_options
 		tgbot
 		DokuWiki
-)
-
-target_compile_features(${PROJECT_NAME}
-	PRIVATE
-		cxx_std_17
 )
 
