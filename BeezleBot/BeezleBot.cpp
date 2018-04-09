@@ -15,6 +15,15 @@ int main(int argc, char **argv)
 				settings.wikiUser, settings.wikiPassword);
 
 		tgbot::LongPollBot bot(settings.telegramToken);
+
+		bot.callback(tgbot::utils::whenStarts, [](
+					const tgbot::types::Message message,
+					const tgbot::methods::Api &api,
+					const std::vector<std::string> args)
+		{
+			api.sendMessage(std::to_string(message.chat.id), "pong");
+		}, "/ping");
+
 		bot.callback([&wiki, &settings](const tgbot::types::Message message,
 		                                const tgbot::methods::Api &api) 
 		{
