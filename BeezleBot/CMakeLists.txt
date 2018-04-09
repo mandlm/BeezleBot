@@ -16,7 +16,7 @@ set_target_properties(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE 
 		Boost::program_options
-		tgbot
+		xxtelebot
 		DokuWiki
 )
 
