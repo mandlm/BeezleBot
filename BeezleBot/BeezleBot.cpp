@@ -24,6 +24,18 @@ int main(int argc, char **argv)
 			api.sendMessage(std::to_string(message.chat.id), "pong");
 		}, "/ping");
 
+		bot.callback(tgbot::utils::whenStarts, [](
+					const tgbot::types::Message message,
+					const tgbot::methods::Api &api,
+					const std::vector<std::string> args)
+		{
+			api.sendMessage(std::to_string(message.chat.id), 
+					"Bot commands:\n"
+					"/ping \tsend life-sign\n"
+					"/help \tshow this message"
+					);
+		}, "/help");
+
 		bot.callback([&wiki, &settings](const tgbot::types::Message message,
 		                                const tgbot::methods::Api &api) 
 		{
