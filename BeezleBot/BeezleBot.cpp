@@ -59,6 +59,11 @@ int main(int argc, char **argv)
 					try
 					{
 						wiki.appendToPage("beezletest", wikiMessage.str());
+
+						std::ostringstream pageUrl;
+						pageUrl << settings.wikiUrl << "/doku.php?id=" << "beezletest";
+						api.sendMessage(std::to_string(message.chat.id), 
+							"Stored to wiki at " + pageUrl.str());
 					}
 					catch (std::runtime_error &e)
 					{
@@ -67,11 +72,6 @@ int main(int argc, char **argv)
 						api.getLogger().error(reply.str());
 						api.sendMessage(std::to_string(message.chat.id), reply.str());
 					}
-
-					std::ostringstream pageUrl;
-					pageUrl << settings.wikiUrl << "/doku.php?id=" << "beezletest";
-					api.sendMessage(std::to_string(message.chat.id), 
-							"Stored to wiki at " + pageUrl.str());
 				}
 			}
 		});
