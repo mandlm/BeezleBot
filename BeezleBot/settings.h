@@ -12,6 +12,5 @@ struct Settings
 	std::string wikiUser;
 	std::string wikiPassword;
 
-	Settings(int argc, char **argv);	
+	Settings(int argc, char **argv);
 };
-

@@ -11,47 +11,47 @@ int main(int argc, char **argv)
 	{
 		Settings settings(argc, argv);
 
-		DokuWiki wiki(settings.wikiUrl + "/lib/exe/xmlrpc.php", 
-				settings.wikiUser, settings.wikiPassword);
+		DokuWiki wiki(settings.wikiUrl + "/lib/exe/xmlrpc.php",
+			settings.wikiUser, settings.wikiPassword);
 
 		tgbot::LongPollBot bot(settings.telegramToken);
 
-		bot.callback(tgbot::utils::whenStarts, [](
-					const tgbot::types::Message message,
-					const tgbot::methods::Api &api,
-					const std::vector<std::string> args)
-		{
-			api.sendMessage(std::to_string(message.chat.id), "pong");
-		}, "/ping");
+		bot.callback(tgbot::utils::whenStarts,
+			[](const tgbot::types::Message message,
+				const tgbot::methods::Api &api,
+				const std::vector<std::string> args) {
+				api.sendMessage(std::to_string(message.chat.id), "pong");
+			},
+			"/ping");
 
-		bot.callback(tgbot::utils::whenStarts, [](
-					const tgbot::types::Message message,
-					const tgbot::methods::Api &api,
-					const std::vector<std::string> args)
-		{
-			api.sendMessage(std::to_string(message.chat.id), 
+		bot.callback(tgbot::utils::whenStarts,
+			[](const tgbot::types::Message message,
+				const tgbot::methods::Api &api,
+				const std::vector<std::string> args) {
+				api.sendMessage(std::to_string(message.chat.id),
 					"Bot commands:\n"
 					"/ping \tsend life-sign\n"
-					"/help \tshow this message"
-					);
-		}, "/help");
+					"/help \tshow this message");
+			},
+			"/help");
 
 		bot.callback([&wiki, &settings](const tgbot::types::Message message,
-		                                const tgbot::methods::Api &api) 
-		{
+						 const tgbot::methods::Api &api) {
 			if (message.text != nullptr && message.from != nullptr
-			    && message.from->username != nullptr)
+				&& message.from->username != nullptr)
 			{
 				if (settings.telegramUsers.find(*message.from->username)
-				    == settings.telegramUsers.end())
+					== settings.telegramUsers.end())
 				{
-					api.sendMessage(std::to_string(message.chat.id), "Unknown user!");
+					api.sendMessage(
+						std::to_string(message.chat.id), "Unknown user!");
 				}
 				else
 				{
 					std::ostringstream logMessage;
-					logMessage << message.from->firstName << " (" << *message.from->username << ")"
-					           << ":\\\\ " << *message.text;
+					logMessage << message.from->firstName << " ("
+							   << *message.from->username << ")"
+							   << ":\\\\ " << *message.text;
 					api.getLogger().info(logMessage.str());
 
 					std::ostringstream wikiMessage;
@@ -61,8 +61,9 @@ int main(int argc, char **argv)
 						wiki.appendToPage("beezletest", wikiMessage.str());
 
 						std::ostringstream pageUrl;
-						pageUrl << settings.wikiUrl << "/doku.php?id=" << "beezletest";
-						api.sendMessage(std::to_string(message.chat.id), 
+						pageUrl << settings.wikiUrl << "/doku.php?id="
+								<< "beezletest";
+						api.sendMessage(std::to_string(message.chat.id),
 							"Stored to wiki at " + pageUrl.str());
 					}
 					catch (std::runtime_error &e)
@@ -70,7 +71,8 @@ int main(int argc, char **argv)
 						std::ostringstream reply;
 						reply << "Error writing to wiki: " << e.what();
 						api.getLogger().error(reply.str());
-						api.sendMessage(std::to_string(message.chat.id), reply.str());
+						api.sendMessage(
+							std::to_string(message.chat.id), reply.str());
 					}
 				}
 			}
