@@ -1,4 +1,5 @@
 #include "settings.h"
+#include "commandhandler.h"
 #include "tgbot/bot.h"
 #include "dokuwiki.h"
 
@@ -11,8 +12,7 @@ int main(int argc, char **argv)
 	{
 		Settings settings(argc, argv);
 
-		DokuWiki wiki(settings.wikiUrl + "/lib/exe/xmlrpc.php",
-			settings.wikiUser, settings.wikiPassword);
+		CommandHandler commandHandler(settings);
 
 		tgbot::LongPollBot bot(settings.telegramToken);
 
@@ -35,48 +35,11 @@ int main(int argc, char **argv)
 			},
 			"/help");
 
-		bot.callback([&wiki, &settings](const tgbot::types::Message message,
+		bot.callback([&commandHandler](const tgbot::types::Message message,
 						 const tgbot::methods::Api &api) {
-			if (message.text != nullptr && message.from != nullptr
-				&& message.from->username != nullptr)
-			{
-				if (settings.telegramUsers.find(*message.from->username)
-					== settings.telegramUsers.end())
-				{
-					api.sendMessage(
-						std::to_string(message.chat.id), "Unknown user!");
-				}
-				else
-				{
-					std::ostringstream logMessage;
-					logMessage << message.from->firstName << " ("
-							   << *message.from->username << ")"
-							   << ":\\\\ " << *message.text;
-					api.getLogger().info(logMessage.str());
-
-					std::ostringstream wikiMessage;
-					wikiMessage << "\n" << logMessage.str() << "\n";
-					try
-					{
-						wiki.appendToPage("beezletest", wikiMessage.str());
-
-						std::ostringstream pageUrl;
-						pageUrl << settings.wikiUrl << "/doku.php?id="
-								<< "beezletest";
-						api.sendMessage(std::to_string(message.chat.id),
-							"Stored to wiki at " + pageUrl.str());
-					}
-					catch (std::runtime_error &e)
-					{
-						std::ostringstream reply;
-						reply << "Error writing to wiki: " << e.what();
-						api.getLogger().error(reply.str());
-						api.sendMessage(
-							std::to_string(message.chat.id), reply.str());
-					}
-				}
-			}
+			commandHandler.handle(message, api);
 		});
+
 		bot.start();
 	}
 	catch (std::runtime_error &e)

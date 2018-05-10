@@ -4,9 +4,10 @@ project(BeezleBot LANGUAGES CXX)
 
 find_package(Boost 1.55.0 COMPONENTS program_options REQUIRED)
 
-add_executable(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME}
 	BeezleBot.cpp
 	settings.cpp
+	commandhandler.cpp
 )
 
 set_target_properties(${PROJECT_NAME}
@@ -14,7 +15,7 @@ set_target_properties(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-	PRIVATE 
+	PRIVATE
 		Boost::program_options
 		xxtelebot
 		DokuWiki
